@@ -19,7 +19,11 @@ if ($request_method === 'GET') {
 
     $query = "SELECT su.user_id, su.person_id, su.username, su.user_role, su.last_login,
                      p.first_name, p.middle_name, p.last_name, p.email, p.contact_no,
-                     p.gender, p.birth_date, p.address, p.civil_status
+                     p.address, p.gender, p.birth_date, p.birth_place, p.religion, p.nationality, p.occupation,
+                     CASE WHEN EXISTS(
+                         SELECT 1 FROM marriage_records mr
+                         WHERE mr.groom_id = p.person_id OR mr.bride_id = p.person_id
+                     ) THEN 'Married' ELSE p.civil_status END AS civil_status
               FROM system_users su
               LEFT JOIN persons p ON su.person_id = p.person_id
               WHERE su.user_id = ?";

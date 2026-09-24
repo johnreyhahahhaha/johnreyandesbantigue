@@ -20,12 +20,15 @@ import {
     Alert,
     Pagination,
     Typography,
+    IconButton,
 } from '@mui/material';
-import { Delete as DeleteIcon } from '@mui/icons-material';
+import { ArrowBack as ArrowBackIcon, Delete as DeleteIcon } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
 
-const API_BASE_URL = 'http://localhost/josephus/st.joseph/public/api';
+const API_BASE_URL = 'http://165.22.181.147/api';
 
 const AuditLogs = () => {
+    const navigate = useNavigate();
     const [logs, setLogs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -89,25 +92,32 @@ const AuditLogs = () => {
     }
 
     return (
-        <Box sx={{ minHeight: '100vh', bgcolor: '#f8fafc' }}>
+        <Box sx={{ minHeight: '100vh', bgcolor: '#edf3f1' }}>
             {/* Header Section */}
-            <Box sx={{ bgcolor: '#ffffff', borderBottom: '1px solid #e2e8f0', py: 3 }}>
+            <Box sx={{ py: { xs: 2.5, md: 3 }, background: 'linear-gradient(110deg, #123b50 0%, #0b6b68 70%, #d1a557 155%)', boxShadow: '0 12px 26px rgba(13, 70, 76, 0.14)' }}>
                 <Container maxWidth="lg">
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <Box>
-                            <Typography variant="h4" sx={{ fontWeight: 700, color: '#1e293b', mb: 0.5 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' }, flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                            <IconButton onClick={() => navigate('/dashboard')} aria-label="Back to dashboard" sx={{ backgroundColor: 'rgba(255,255,255,0.14)', color: 'white', '&:hover': { backgroundColor: 'rgba(255,255,255,0.24)' } }}><ArrowBackIcon /></IconButton>
+                            <Box>
+                            <Typography variant="overline" sx={{ color: 'rgba(255,255,255,0.7)', fontWeight: 700, letterSpacing: '0.12em' }}>
+                                System oversight
+                            </Typography>
+                            <Typography variant="h4" sx={{ fontWeight: 800, color: 'white', mb: 0.5, lineHeight: 1.15 }}>
                                 Audit Logs
                             </Typography>
-                            <Typography variant="body2" sx={{ color: '#64748b' }}>
+                            <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.78)' }}>
                                 Track system activity and user actions
                             </Typography>
+                            </Box>
                         </Box>
-                        <Button 
+                            <Button 
                             variant="outlined" 
                             color="error"
                             startIcon={<DeleteIcon />}
                             onClick={() => setOpenDeleteDialog(true)}
-                        >
+                                sx={{ borderColor: 'rgba(255,255,255,0.55)', color: 'white', '&:hover': { borderColor: 'white', backgroundColor: 'rgba(255,255,255,0.1)' } }}
+                            >
                             Delete Old Logs
                         </Button>
                     </Box>
@@ -115,13 +125,13 @@ const AuditLogs = () => {
             </Box>
 
             {/* Content Section */}
-            <Container maxWidth="lg" sx={{ py: 4 }}>
+            <Container maxWidth="lg" sx={{ py: { xs: 3, md: 4 } }}>
                 {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
 
-                <TableContainer component={Paper} sx={{ backgroundColor: '#fff', borderRadius: 1, overflow: 'auto' }}>
+                <TableContainer component={Paper} sx={{ backgroundColor: '#fff', borderRadius: 3, border: '1px solid rgba(17, 75, 80, 0.1)', boxShadow: '0 8px 24px rgba(26, 67, 74, 0.06)', overflow: 'auto' }}>
                     <Table sx={{ minWidth: 750 }}>
                         <TableHead>
-                            <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
+                            <TableRow sx={{ backgroundColor: '#f1f6f5' }}>
                                 <TableCell sx={{ fontWeight: 700, color: '#1e293b' }}>ID</TableCell>
                                 <TableCell sx={{ fontWeight: 700, color: '#1e293b' }}>User</TableCell>
                                 <TableCell sx={{ fontWeight: 700, color: '#1e293b' }}>Action</TableCell>

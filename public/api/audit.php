@@ -65,4 +65,8 @@ function logDelete($user_id, $table_affected, $item_id, $item_name, $conn) {
     return logAuditAction($user_id, 'DELETE', $table_affected, $description, $conn);
 }
 
+function logAudit($conn, $user_id, $action_type, $table_affected, $description) {
+    return logAuditAction($user_id, $action_type, $table_affected, $description, $conn);
+}
+
 ?>

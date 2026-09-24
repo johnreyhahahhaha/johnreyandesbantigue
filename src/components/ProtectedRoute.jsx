@@ -3,7 +3,7 @@ import { Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { CircularProgress, Box } from '@mui/material';
 
-const ProtectedRoute = ({ children }) => {
+const ProtectedRoute = ({ children, adminOnly = false }) => {
     const { isAuthenticated, loading } = useAuth();
 
     if (loading) {
@@ -16,6 +16,13 @@ const ProtectedRoute = ({ children }) => {
 
     if (!isAuthenticated) {
         return <Navigate to="/login" replace />;
+    }
+
+    if (adminOnly) {
+        const storedUser = JSON.parse(localStorage.getItem('user') || 'null');
+        if (storedUser?.user_role !== 'Admin') {
+            return <Navigate to="/dashboard" replace />;
+        }
     }
 
     return children;

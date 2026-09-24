@@ -1,0 +1,26 @@
+[build]
+command = "npm run build"
+publish = "dist"
+
+[dev]
+command = "npm run dev"
+port = 5173
+
+[[redirects]]
+from = "/api/*"
+to = "https://josephus-parish.com/api/:splat"
+status = 200
+force = true
+[[redirects]]
+from = "/*"
+to = "/index.html"
+status = 200
+
+[context.production.environment]
+API_URL = "https://josephus-parish.com/api"
+
+[context.preview.environment]
+API_URL = "https://preview.josephus-parish.com/api"
+
+[context.dev.environment]
+API_URL = "http://localhost/josephus/st.joseph/public/api"

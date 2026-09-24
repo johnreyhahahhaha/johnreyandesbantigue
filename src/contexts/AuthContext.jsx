@@ -20,7 +20,28 @@ export const AuthProvider = ({ children }) => {
         const storedUser = localStorage.getItem('user');
         if (storedUser) {
             try {
-                setUser(JSON.parse(storedUser));
+                const parsedUser = JSON.parse(storedUser);
+                setUser(parsedUser);
+
+                if (parsedUser.user_id) {
+                    (async () => {
+                        try {
+                            const response = await fetch(`/api/profile.php?user_id=${parsedUser.user_id}`);
+                            const data = await response.json();
+                            if (data.success && data.user) {
+                                const updatedUser = {
+                                    ...parsedUser,
+                                    ...data.user,
+                                    phone: data.user.contact_no || parsedUser.phone || parsedUser.contact_no,
+                                };
+                                setUser(updatedUser);
+                                localStorage.setItem('user', JSON.stringify(updatedUser));
+                            }
+                        } catch (err) {
+                            console.error('Profile refresh failed:', err);
+                        }
+                    })();
+                }
             } catch (e) {
                 console.error('Error parsing stored user:', e);
                 localStorage.removeItem('user');
@@ -33,10 +54,8 @@ export const AuthProvider = ({ children }) => {
         setLoading(true);
         setError(null);
         try {
-            // Use Vite proxy at /api which rewrites to Apache
             const apiUrl = '/api/login.php';
-            console.log('Login attempt', { apiUrl, username, password });
-            
+
             const response = await fetch(apiUrl, {
                 method: 'POST',
                 headers: {
@@ -46,17 +65,13 @@ export const AuthProvider = ({ children }) => {
                 body: JSON.stringify({ username, password })
             });
 
-            console.log('Response received:', { status: response.status, statusText: response.statusText });
-            
             const text = await response.text();
-            console.log('Response text:', text);
-            
             const data = JSON.parse(text);
 
             if (data.success) {
                 setUser(data.user);
                 localStorage.setItem('user', JSON.stringify(data.user));
-                return { success: true };
+                return { success: true, user: data.user };
             } else {
                 setError(data.message || 'Login failed');
                 return { success: false, message: data.message };

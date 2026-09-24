@@ -30,7 +30,7 @@ import {
 } from '@mui/material';
 import { Add as AddIcon } from '@mui/icons-material';
 
-const API_BASE_URL = 'http://localhost/josephus/st.joseph/public/api';
+const API_BASE_URL = 'http://165.22.181.147/api';
 
 const SacramentsEnhanced = () => {
     const [baptisms, setBaptisms] = useState([]);
@@ -104,8 +104,10 @@ const SacramentsEnhanced = () => {
                 return;
             }
         } else if (dialogType === 'confirmation') {
-            if (!formData.person_id || !formData.confirmation_date) {
-                setError('Please fill in: Person ID and Confirmation Date');
+            if (!formData.person_id || !formData.confirmation_date || !formData.registry_book_no ||
+                formData.registry_book_no === '' || !formData.page_no || formData.page_no === '' ||
+                !formData.entry_no || formData.entry_no === '') {
+                setError('Please fill in: Person ID, Confirmation Date, Registry Book No, Page No, Entry No');
                 return;
             }
         }
@@ -116,16 +118,27 @@ const SacramentsEnhanced = () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ ...formData, type: dialogType })
             });
-            
-            const data = await response.json();
 
-            if (data.success) {
+            const text = await response.text();
+            let data;
+            try {
+                data = text ? JSON.parse(text) : null;
+            } catch (jsonErr) {
+                throw new Error('Invalid server response: ' + text);
+            }
+
+            if (!response.ok) {
+                const message = data?.message || response.statusText || 'Server error';
+                throw new Error(message);
+            }
+
+            if (data?.success) {
                 setOpenDialog(false);
                 setFormData({});
                 setError('');
                 await fetchAllData();
             } else {
-                setError('Failed to add sacrament: ' + (data.message || 'Unknown error'));
+                setError('Failed to add sacrament: ' + (data?.message || 'Unknown error'));
             }
         } catch (err) {
             setError('Error saving record: ' + err.message);
@@ -143,26 +156,63 @@ const SacramentsEnhanced = () => {
         return person ? `${person.first_name} ${person.last_name}` : 'N/A';
     };
 
+    const tableContainerSx = {
+        overflowX: 'auto',
+        width: '100%',
+        maxWidth: '100%',
+        bgcolor: '#ffffff',
+        borderRadius: 2,
+    };
+
+    const tableSx = {
+        minWidth: { xs: 760, md: 980 },
+        width: '100%',
+        '& th, & td': {
+            whiteSpace: 'normal',
+            wordBreak: 'break-word',
+            overflowWrap: 'anywhere',
+            px: { xs: 1, sm: 1.25, md: 1.5 },
+            py: { xs: 0.8, md: 1 },
+            fontSize: { xs: '0.75rem', md: '0.875rem' },
+        },
+    };
+
     if (loading) return <CircularProgress />;
 
     return (
-        <Container maxWidth="lg" sx={{ py: 4 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-                <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+        <Container maxWidth="lg" sx={{ py: { xs: 3, md: 4 } }}>
+            <Box sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: { xs: 'flex-start', sm: 'center' },
+                flexDirection: { xs: 'column', sm: 'row' },
+                gap: 2,
+                mb: 3,
+            }}>
+                <Typography variant="h4" sx={{ fontWeight: 'bold', fontSize: { xs: '2rem', md: '2.5rem' } }}>
                     Sacrament Records
                 </Typography>
                 <Button variant="contained" startIcon={<AddIcon />} onClick={() => {
-                    setDialogType('baptism');
+                    const types = ['baptism','marriage','confirmation'];
+                    const initial = types[activeTab] || 'baptism';
+                    setDialogType(initial);
                     setFormData({});
                     setOpenDialog(true);
-                }}>
+                }} sx={{ whiteSpace: 'nowrap' }}>
                     Add Sacrament
                 </Button>
             </Box>
 
             {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
-            <Tabs value={activeTab} onChange={(e, v) => setActiveTab(v)} sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+            <Tabs
+                value={activeTab}
+                onChange={(e, v) => setActiveTab(v)}
+                variant="scrollable"
+                scrollButtons="auto"
+                allowScrollButtonsMobile
+                sx={{ borderBottom: 1, borderColor: 'divider', mb: 3, '& .MuiTab-root': { minWidth: { xs: 120, sm: 140 } } }}
+            >
                 <Tab label={`Baptisms (${baptisms.length})`} />
                 <Tab label={`Marriages (${marriages.length})`} />
                 <Tab label={`Confirmations (${confirmations.length})`} />
@@ -170,8 +220,8 @@ const SacramentsEnhanced = () => {
 
             {/* Baptisms Tab */}
             {activeTab === 0 && (
-                <TableContainer component={Paper}>
-                    <Table>
+                <TableContainer component={Paper} sx={tableContainerSx}>
+                    <Table sx={tableSx}>
                         <TableHead sx={{ backgroundColor: '#f5f5f5' }}>
                             <TableRow>
                                 <TableCell sx={{ fontWeight: 'bold' }}>Person</TableCell>
@@ -205,8 +255,8 @@ const SacramentsEnhanced = () => {
 
             {/* Marriages Tab */}
             {activeTab === 1 && (
-                <TableContainer component={Paper}>
-                    <Table>
+                <TableContainer component={Paper} sx={tableContainerSx}>
+                    <Table sx={tableSx}>
                         <TableHead sx={{ backgroundColor: '#f5f5f5' }}>
                             <TableRow>
                                 <TableCell sx={{ fontWeight: 'bold' }}>Groom</TableCell>
@@ -233,14 +283,17 @@ const SacramentsEnhanced = () => {
 
             {/* Confirmations Tab */}
             {activeTab === 2 && (
-                <TableContainer component={Paper}>
-                    <Table>
+                <TableContainer component={Paper} sx={tableContainerSx}>
+                    <Table sx={tableSx}>
                         <TableHead sx={{ backgroundColor: '#f5f5f5' }}>
                             <TableRow>
                                 <TableCell sx={{ fontWeight: 'bold' }}>Person</TableCell>
                                 <TableCell sx={{ fontWeight: 'bold' }}>Confirmation Date</TableCell>
                                 <TableCell sx={{ fontWeight: 'bold' }}>Bishop</TableCell>
                                 <TableCell sx={{ fontWeight: 'bold' }}>Sponsors</TableCell>
+                                <TableCell sx={{ fontWeight: 'bold' }}>Registry Book</TableCell>
+                                <TableCell sx={{ fontWeight: 'bold' }}>Page</TableCell>
+                                <TableCell sx={{ fontWeight: 'bold' }}>Entry</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
@@ -250,6 +303,9 @@ const SacramentsEnhanced = () => {
                                     <TableCell>{c.confirmation_date}</TableCell>
                                     <TableCell>{c.confirming_bishop}</TableCell>
                                     <TableCell>{c.sponsor_names}</TableCell>
+                                    <TableCell>{c.registry_book_no}</TableCell>
+                                    <TableCell>{c.page_no}</TableCell>
+                                    <TableCell>{c.entry_no}</TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
@@ -258,9 +314,21 @@ const SacramentsEnhanced = () => {
             )}
 
             {/* Add Sacrament Dialog */}
-            <Dialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth="sm" fullWidth>
-                <DialogTitle>Add Sacrament Record</DialogTitle>
-                <DialogContent sx={{ pt: 2 }}>
+            <Dialog
+                open={openDialog}
+                onClose={() => setOpenDialog(false)}
+                maxWidth="sm"
+                fullWidth
+                sx={{
+                    '& .MuiDialog-paper': {
+                        m: { xs: 1, sm: 2 },
+                        maxHeight: '90vh',
+                        width: '100%',
+                    },
+                }}
+            >
+                <DialogTitle sx={{ fontSize: { xs: '1.1rem', sm: '1.25rem' } }}>Add Sacrament Record</DialogTitle>
+                <DialogContent sx={{ pt: 2, px: { xs: 2, sm: 3 }, maxHeight: '70vh', overflowY: 'auto' }}>
                     {/* Sacrament Type Selector */}
                     <FormControl fullWidth margin="dense">
                         <InputLabel>Sacrament Type</InputLabel>
@@ -304,6 +372,9 @@ const SacramentsEnhanced = () => {
                             <TextField fullWidth label="Confirmation Date" type="date" name="confirmation_date" value={formData.confirmation_date || ''} onChange={handleInputChange} margin="dense" InputLabelProps={{ shrink: true }} />
                             <TextField fullWidth label="Bishop Name" name="confirming_bishop" value={formData.confirming_bishop || ''} onChange={handleInputChange} margin="dense" />
                             <TextField fullWidth label="Sponsors" name="sponsor_names" value={formData.sponsor_names || ''} onChange={handleInputChange} margin="dense" multiline rows={2} helperText="Names of sponsors/godparents" />
+                            <TextField fullWidth label="Registry Book No" name="registry_book_no" value={formData.registry_book_no || ''} onChange={handleInputChange} margin="dense" />
+                            <TextField fullWidth label="Page No" type="number" name="page_no" value={formData.page_no || ''} onChange={handleInputChange} margin="dense" />
+                            <TextField fullWidth label="Entry No" type="number" name="entry_no" value={formData.entry_no || ''} onChange={handleInputChange} margin="dense" />
                         </>
                     )}
                 </DialogContent>

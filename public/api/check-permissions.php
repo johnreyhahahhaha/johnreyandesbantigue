@@ -19,7 +19,7 @@ if ($request_method === 'GET') {
     $role = $conn->real_escape_string($_GET['role']);
 
     // Validate role
-    $validRoles = ['Admin', 'Secretary', 'Treasurer', 'Priest'];
+    $validRoles = ['Admin', 'Secretary', 'Treasurer', 'Priest', 'Person'];
     if (!in_array($role, $validRoles)) {
         http_response_code(400);
         echo json_encode(['success' => false, 'message' => 'Invalid role']);
@@ -41,11 +41,30 @@ if ($request_method === 'GET') {
         'community',
         'document_requests',
         'cemetery_records',
+        'cemetery_contracts',
+        'cemetery_sections',
+        'cemetery_structures',
+        'burial_records',
+        'exhumation_records',
         'file_attachments',
         'notification_logs',
         'parish_config',
         'requirement_checklists',
-        'sacramental_annotations'
+        'sacramental_annotations',
+        'announcements',
+        'chat',
+        'households',
+        'seminar_types',
+        'seminar_attendance',
+        'service_fees',
+        'accounting_categories',
+        'godparents_records',
+        'ministries',
+        'branding_settings',
+        'send_notification',
+        'document_templates',
+        'programs',
+        'settings'
     ];
 
     $moduleAccess = [];

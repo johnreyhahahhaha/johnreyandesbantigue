@@ -19,7 +19,7 @@ if ($request_method === 'GET') {
                      p.first_name, p.middle_name, p.last_name, p.email, p.contact_no
               FROM system_users su
               LEFT JOIN persons p ON su.person_id = p.person_id
-              ORDER BY su.user_id DESC";
+              ORDER BY su.user_id ASC";
 
     $result = $conn->query($query);
 
@@ -53,7 +53,7 @@ if ($request_method === 'GET') {
     }
 
     $username = $conn->real_escape_string($data['username']);
-    $password_hash = md5($data['password']);
+    $password_hash = password_hash($data['password'], PASSWORD_DEFAULT);
     $person_id = intval($data['person_id']);
     $user_role = $conn->real_escape_string($data['user_role']);
 
@@ -111,7 +111,7 @@ if ($request_method === 'GET') {
     }
 
     $update_user_id = intval($data['user_id']);
-    $password_hash = md5($data['password']);
+    $password_hash = password_hash($data['password'], PASSWORD_DEFAULT);
 
     $query = "UPDATE system_users SET password_hash = '$password_hash' WHERE user_id = $update_user_id";
 

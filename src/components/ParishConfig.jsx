@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
     Box,
     Container,
@@ -23,12 +24,13 @@ import {
     CardContent,
     Grid,
 } from '@mui/material';
-import { Add as AddIcon, Delete as DeleteIcon, Edit as EditIcon } from '@mui/icons-material';
+import { Add as AddIcon, Delete as DeleteIcon, Edit as EditIcon, ArrowBack as ArrowBackIcon } from '@mui/icons-material';
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost/josephus/st.joseph/public/api';
+const API_BASE_URL = 'http://165.22.181.147/api';
 
 const ParishConfig = () => {
+    const navigate = useNavigate();
     const [configs, setConfigs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [openDialog, setOpenDialog] = useState(false);
@@ -124,28 +126,39 @@ const ParishConfig = () => {
     }
 
     return (
-        <Container maxWidth="lg" sx={{ py: 4 }}>
-            {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-            {success && <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>}
-
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-                <Typography variant="h4">Parish Configuration</Typography>
-                <Button
-                    variant="contained"
-                    color="primary"
-                    startIcon={<AddIcon />}
-                    onClick={() => handleOpenDialog()}
-                >
+        <Box sx={{ minHeight: '100vh', bgcolor: '#edf3f1' }}>
+        <Box sx={{ py: { xs: 2.5, md: 3 }, background: 'linear-gradient(110deg, #123b50 0%, #0b6b68 70%, #d1a557 155%)', boxShadow: '0 12px 26px rgba(13, 70, 76, 0.14)' }}>
+            <Container maxWidth="lg">
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' }, flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                    <IconButton onClick={() => navigate('/dashboard')} aria-label="Back to dashboard" sx={{ backgroundColor: 'rgba(255,255,255,0.14)', color: 'white', '&:hover': { backgroundColor: 'rgba(255,255,255,0.24)' } }}>
+                        <ArrowBackIcon />
+                    </IconButton>
+                    <Box>
+                        <Typography variant="overline" sx={{ color: 'rgba(255,255,255,0.7)', fontWeight: 700, letterSpacing: '0.12em' }}>
+                            Parish settings
+                        </Typography>
+                        <Typography variant="h4" component="h1" sx={{ fontWeight: 800, color: 'white', lineHeight: 1.15 }}>
+                            Parish Configuration
+                        </Typography>
+                    </Box>
+                </Box>
+                <Button variant="contained" startIcon={<AddIcon />} onClick={() => handleOpenDialog()} sx={{ bgcolor: '#d6a85a', color: '#123b50', '&:hover': { bgcolor: '#e3ba70' }, boxShadow: 'none' }}>
                     Add Configuration
                 </Button>
             </Box>
+            </Container>
+        </Box>
+        <Container maxWidth="lg" sx={{ py: { xs: 3, md: 4 } }}>
+            {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+            {success && <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>}
 
-            <Card sx={{ mb: 3 }}>
-                <CardContent>
+            <Card sx={{ mb: 3, borderRadius: 3, border: '1px solid rgba(17, 75, 80, 0.1)', boxShadow: '0 8px 24px rgba(26, 67, 74, 0.06)' }}>
+                <CardContent sx={{ p: { xs: 1.5, md: 2 } }}>
                     <Grid container spacing={2}>
                         <Grid item xs={12} sm={6} md={4}>
-                            <Box sx={{ p: 2, bgcolor: '#e3f2fd', borderRadius: 1 }}>
-                                <Typography color="textSecondary" gutterBottom>
+                            <Box sx={{ p: 2, bgcolor: '#e5f3f6', borderTop: '3px solid #168fa3', borderRadius: 2 }}>
+                                <Typography color="textSecondary" variant="caption" sx={{ fontWeight: 700 }}>
                                     Total Configuration Keys
                                 </Typography>
                                 <Typography variant="h5">{configs.length}</Typography>
@@ -155,9 +168,9 @@ const ParishConfig = () => {
                 </CardContent>
             </Card>
 
-            <TableContainer component={Paper}>
+            <TableContainer component={Paper} sx={{ borderRadius: 3, border: '1px solid rgba(17, 75, 80, 0.1)', boxShadow: '0 8px 24px rgba(26, 67, 74, 0.06)', overflow: 'auto' }}>
                 <Table>
-                    <TableHead sx={{ bgcolor: '#f5f5f5' }}>
+                    <TableHead sx={{ bgcolor: '#f1f6f5' }}>
                         <TableRow>
                             <TableCell><strong>Configuration Key</strong></TableCell>
                             <TableCell><strong>Value</strong></TableCell>
@@ -236,6 +249,7 @@ const ParishConfig = () => {
                 </DialogActions>
             </Dialog>
         </Container>
+        </Box>
     );
 };
 

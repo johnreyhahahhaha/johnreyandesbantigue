@@ -7,18 +7,31 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "signaling": "node signaling-server.js"
   },
   "dependencies": {
+    "@capacitor-firebase/authentication": "^8.5.0",
+    "@capacitor/android": "^8.3.1",
+    "@capacitor/cli": "^8.3.1",
+    "@capacitor/core": "^8.3.1",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@mui/icons-material": "^7.3.8",
     "@mui/lab": "^7.0.1-beta.22",
-    "@mui/material": "^7.3.8",
+    "@mui/material": "^7.3.11",
+    "@supabase/supabase-js": "^2.116.0",
+    "apexcharts": "^6.8.0",
     "axios": "^1.13.5",
+    "events": "^3.3.0",
+    "firebase": "^12.19.0",
+    "html5-qrcode": "^2.3.8",
     "react": "^19.2.0",
+    "react-apexcharts": "^2.1.1",
     "react-dom": "^19.2.4",
-    "react-router-dom": "^7.13.0"
+    "react-router-dom": "^7.13.0",
+    "simple-peer": "^9.11.1",
+    "ws": "^8.21.3"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
@@ -29,6 +42,7 @@
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.24",
     "globals": "^16.5.0",
+    "sharp": "^0.34.5",
     "vite": "^7.3.1"
   }
 }

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "800195672737",
+    "project_id": "st-joseph-server",
+    "storage_bucket": "st-joseph-server.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:800195672737:android:4a9b252527406e2e38cee0",
+        "android_client_info": {
+          "package_name": "com.stjoseph.parish"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBnLkr-B7QNDDXKet6TWvDzb_MeTjHhD7w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

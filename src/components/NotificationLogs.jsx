@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
     Box,
     Container,
@@ -28,12 +29,13 @@ import {
     Grid,
     Chip,
 } from '@mui/material';
-import { Add as AddIcon, Delete as DeleteIcon, Edit as EditIcon } from '@mui/icons-material';
+import { Add as AddIcon, Delete as DeleteIcon, Edit as EditIcon, ArrowBack as ArrowBackIcon } from '@mui/icons-material';
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost/josephus/st.joseph/public/api';
+const API_BASE_URL = 'http://165.22.181.147/api';
 
 const NotificationLogs = () => {
+    const navigate = useNavigate();
     const [logs, setLogs] = useState([]);
     const [persons, setPersons] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -45,6 +47,7 @@ const NotificationLogs = () => {
         person_id: '',
         message_body: '',
         notif_type: 'Email',
+        recipient_address: '',
         sent_status: 'Pending',
     });
     const [editingId, setEditingId] = useState(null);
@@ -87,6 +90,7 @@ const NotificationLogs = () => {
             person_id: '',
             message_body: '',
             notif_type: 'Email',
+            recipient_address: '',
             sent_status: 'Pending',
         });
         setEditingId(null);
@@ -108,7 +112,7 @@ const NotificationLogs = () => {
     };
 
     const handleAddLog = async () => {
-        if (!formData.message_body) {
+        if (!formData.message_body || !formData.recipient_address) {
             setError('Please fill in all required fields');
             return;
         }
@@ -182,36 +186,44 @@ const NotificationLogs = () => {
     }
 
     return (
-        <Container maxWidth="lg" sx={{ py: 4 }}>
-            {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-            {success && <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>}
-
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-                <Typography variant="h4">Notification Logs</Typography>
-                <Button
-                    variant="contained"
-                    color="primary"
-                    startIcon={<AddIcon />}
-                    onClick={handleOpenDialog}
-                >
+        <Box sx={{ minHeight: '100vh', bgcolor: '#edf3f1' }}>
+        <Box sx={{ py: { xs: 2.5, md: 3 }, background: 'linear-gradient(110deg, #123b50 0%, #0b6b68 70%, #d1a557 155%)', boxShadow: '0 12px 26px rgba(13, 70, 76, 0.14)' }}>
+            <Container maxWidth="lg">
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' }, flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                    <IconButton onClick={() => navigate('/dashboard')} aria-label="Back to dashboard" sx={{ backgroundColor: 'rgba(255,255,255,0.14)', color: 'white', '&:hover': { backgroundColor: 'rgba(255,255,255,0.24)' } }}>
+                        <ArrowBackIcon />
+                    </IconButton>
+                    <Box>
+                        <Typography variant="overline" sx={{ color: 'rgba(255,255,255,0.7)', fontWeight: 700, letterSpacing: '0.12em' }}>Delivery center</Typography>
+                        <Typography variant="h4" sx={{ fontWeight: 800, color: 'white', lineHeight: 1.15 }}>Notification logs</Typography>
+                        <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.78)', mt: 0.5 }}>Monitor parish messages across every channel.</Typography>
+                    </Box>
+                </Box>
+                <Button variant="contained" startIcon={<AddIcon />} onClick={handleOpenDialog} sx={{ bgcolor: '#d6a85a', color: '#123b50', '&:hover': { bgcolor: '#e3ba70' }, boxShadow: 'none' }}>
                     Send Notification
                 </Button>
             </Box>
+            </Container>
+        </Box>
+        <Container maxWidth="lg" sx={{ py: { xs: 3, md: 4 } }}>
+            {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+            {success && <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>}
 
-            <Card sx={{ mb: 3 }}>
-                <CardContent>
+            <Card sx={{ mb: 3, borderRadius: 3, border: '1px solid rgba(17, 75, 80, 0.1)', boxShadow: '0 8px 24px rgba(26, 67, 74, 0.06)' }}>
+                <CardContent sx={{ p: { xs: 1.5, md: 2 } }}>
                     <Grid container spacing={2}>
                         <Grid item xs={12} sm={6} md={3}>
-                            <Box sx={{ p: 2, bgcolor: '#e3f2fd', borderRadius: 1 }}>
-                                <Typography color="textSecondary" gutterBottom>
+                            <Box sx={{ p: 2, bgcolor: '#e5f3f6', borderTop: '3px solid #168fa3', borderRadius: 2 }}>
+                                <Typography color="textSecondary" variant="caption" sx={{ fontWeight: 700 }}>
                                     Total Notifications
                                 </Typography>
                                 <Typography variant="h5">{logs.length}</Typography>
                             </Box>
                         </Grid>
                         <Grid item xs={12} sm={6} md={3}>
-                            <Box sx={{ p: 2, bgcolor: '#fff3e0', borderRadius: 1 }}>
-                                <Typography color="textSecondary" gutterBottom>
+                            <Box sx={{ p: 2, bgcolor: '#fff4df', borderTop: '3px solid #d49347', borderRadius: 2 }}>
+                                <Typography color="textSecondary" variant="caption" sx={{ fontWeight: 700 }}>
                                     Pending
                                 </Typography>
                                 <Typography variant="h5">
@@ -220,8 +232,8 @@ const NotificationLogs = () => {
                             </Box>
                         </Grid>
                         <Grid item xs={12} sm={6} md={3}>
-                            <Box sx={{ p: 2, bgcolor: '#e8f5e9', borderRadius: 1 }}>
-                                <Typography color="textSecondary" gutterBottom>
+                            <Box sx={{ p: 2, bgcolor: '#e8f4ec', borderTop: '3px solid #25a878', borderRadius: 2 }}>
+                                <Typography color="textSecondary" variant="caption" sx={{ fontWeight: 700 }}>
                                     Sent
                                 </Typography>
                                 <Typography variant="h5">
@@ -230,8 +242,8 @@ const NotificationLogs = () => {
                             </Box>
                         </Grid>
                         <Grid item xs={12} sm={6} md={3}>
-                            <Box sx={{ p: 2, bgcolor: '#ffebee', borderRadius: 1 }}>
-                                <Typography color="textSecondary" gutterBottom>
+                            <Box sx={{ p: 2, bgcolor: '#fff0ee', borderTop: '3px solid #b75c56', borderRadius: 2 }}>
+                                <Typography color="textSecondary" variant="caption" sx={{ fontWeight: 700 }}>
                                     Failed
                                 </Typography>
                                 <Typography variant="h5">
@@ -243,14 +255,15 @@ const NotificationLogs = () => {
                 </CardContent>
             </Card>
 
-            <TableContainer component={Paper}>
+            <TableContainer component={Paper} sx={{ borderRadius: 3, border: '1px solid rgba(17, 75, 80, 0.1)', boxShadow: '0 8px 24px rgba(26, 67, 74, 0.06)', overflow: 'auto' }}>
                 <Table>
-                    <TableHead sx={{ bgcolor: '#f5f5f5' }}>
+                    <TableHead>
                         <TableRow>
                             <TableCell><strong>ID</strong></TableCell>
                             <TableCell><strong>Person</strong></TableCell>
                             <TableCell><strong>Message</strong></TableCell>
                             <TableCell><strong>Type</strong></TableCell>
+                            <TableCell><strong>Recipient</strong></TableCell>
                             <TableCell><strong>Status</strong></TableCell>
                             <TableCell><strong>Sent At</strong></TableCell>
                             <TableCell align="center"><strong>Actions</strong></TableCell>
@@ -261,11 +274,12 @@ const NotificationLogs = () => {
                             logs.map((log) => (
                                 <TableRow key={log.notif_id} hover>
                                     <TableCell>{log.notif_id}</TableCell>
-                                    <TableCell>{log.first_name} {log.last_name || 'N/A'}</TableCell>
+                                    <TableCell sx={{ fontWeight: 700, color: '#123b50' }}>{log.first_name} {log.last_name || 'N/A'}</TableCell>
                                     <TableCell sx={{ maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                         {log.message_body}
                                     </TableCell>
                                     <TableCell>{log.notif_type}</TableCell>
+                                    <TableCell>{log.recipient_address}</TableCell>
                                     <TableCell>
                                         <Chip
                                             label={log.sent_status}
@@ -288,7 +302,7 @@ const NotificationLogs = () => {
                             ))
                         ) : (
                             <TableRow>
-                                <TableCell colSpan={7} align="center" sx={{ py: 3 }}>
+                                <TableCell colSpan={8} align="center" sx={{ py: 3 }}>
                                     No notification logs found
                                 </TableCell>
                             </TableRow>
@@ -329,13 +343,37 @@ const NotificationLogs = () => {
                         <InputLabel>Type</InputLabel>
                         <Select
                             value={formData.notif_type}
-                            onChange={(e) => setFormData({ ...formData, notif_type: e.target.value })}
+                            onChange={(e) => setFormData({ ...formData, notif_type: e.target.value, recipient_address: '' })}
                             label="Type"
                         >
                             <MenuItem value="Email">Email</MenuItem>
                             <MenuItem value="SMS">SMS</MenuItem>
                         </Select>
                     </FormControl>
+                    {formData.notif_type === 'Email' && (
+                        <TextField
+                            fullWidth
+                            margin="normal"
+                            label="Recipient Email *"
+                            type="email"
+                            value={formData.recipient_address}
+                            onChange={(e) => setFormData({ ...formData, recipient_address: e.target.value })}
+                            placeholder="example@email.com"
+                            required
+                        />
+                    )}
+                    {formData.notif_type === 'SMS' && (
+                        <TextField
+                            fullWidth
+                            margin="normal"
+                            label="Recipient Phone Number *"
+                            type="tel"
+                            value={formData.recipient_address}
+                            onChange={(e) => setFormData({ ...formData, recipient_address: e.target.value })}
+                            placeholder="+63xxxxxxxxxx"
+                            required
+                        />
+                    )}
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleCloseDialog}>Cancel</Button>
@@ -382,6 +420,7 @@ const NotificationLogs = () => {
                 </DialogActions>
             </Dialog>
         </Container>
+        </Box>
     );
 };
 

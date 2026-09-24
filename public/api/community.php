@@ -49,6 +49,14 @@ if ($request_method === 'GET') {
                   LEFT JOIN persons p ON bl.person_id = p.person_id
                   LEFT JOIN social_programs sp ON bl.program_id = sp.program_id
                   ORDER BY bl.date_given DESC";
+    } elseif ($type === 'activities') {
+        // Get community activities
+        $query = "SELECT ca.*, p.first_name, p.last_name, m.ministry_name, sp.program_name
+                  FROM community_activities ca
+                  LEFT JOIN persons p ON ca.coordinator_id = p.person_id
+                  LEFT JOIN ministries m ON ca.ministry_id = m.ministry_id
+                  LEFT JOIN social_programs sp ON ca.program_id = sp.program_id
+                  ORDER BY ca.created_at DESC";
     } else {
         http_response_code(400);
         echo json_encode(['success' => false, 'message' => 'Invalid type: ' . htmlspecialchars($type)]);
@@ -99,6 +107,13 @@ if ($request_method === 'GET') {
         $date_joined = $conn->real_escape_string($data['date_joined'] ?? date('Y-m-d'));
         $status = $conn->real_escape_string($data['status'] ?? 'Active');
 
+        $existing_check = $conn->query("SELECT volunteer_id FROM parish_volunteers WHERE person_id = $person_id AND ministry_id = $ministry_id LIMIT 1");
+        if ($existing_check && $existing_check->num_rows > 0) {
+            http_response_code(200);
+            echo json_encode(['success' => true, 'message' => 'Already joined this ministry', 'duplicate' => true]);
+            exit();
+        }
+
         $query = "INSERT INTO parish_volunteers (person_id, ministry_id, role, date_joined, status)
                   VALUES ($person_id, $ministry_id, '$role', '$date_joined', '$status')";
         $table_name = 'parish_volunteers';
@@ -118,6 +133,31 @@ if ($request_method === 'GET') {
                   VALUES ('$program_name', '$objective', $budget)";
         $table_name = 'social_programs';
         $log_desc = "Added program: $program_name";
+    } elseif ($type === 'activities') {
+        if (!isset($data['activity_name']) || !isset($data['activity_type'])) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => 'Missing required fields: activity_name, activity_type']);
+            exit();
+        }
+
+        $activity_name = $conn->real_escape_string($data['activity_name']);
+        $activity_type = $conn->real_escape_string($data['activity_type']);
+        $description = $conn->real_escape_string($data['description'] ?? '');
+        $ministry_id = isset($data['ministry_id']) && $data['ministry_id'] ? intval($data['ministry_id']) : 'NULL';
+        $program_id = isset($data['program_id']) && $data['program_id'] ? intval($data['program_id']) : 'NULL';
+        $coordinator_id = isset($data['coordinator_id']) && $data['coordinator_id'] ? intval($data['coordinator_id']) : 'NULL';
+        $start_date = isset($data['start_date']) && $data['start_date'] ? "'" . $conn->real_escape_string($data['start_date']) . "'" : 'NULL';
+        $end_date = isset($data['end_date']) && $data['end_date'] ? "'" . $conn->real_escape_string($data['end_date']) . "'" : 'NULL';
+        $status = $conn->real_escape_string($data['status'] ?? 'planned');
+        $budget_allocated = floatval($data['budget_allocated'] ?? 0);
+        $beneficiaries_target = intval($data['beneficiaries_target'] ?? 0);
+        $beneficiaries_served = intval($data['beneficiaries_served'] ?? 0);
+        $notes = $conn->real_escape_string($data['notes'] ?? '');
+
+        $query = "INSERT INTO community_activities (activity_name, activity_type, description, ministry_id, program_id, coordinator_id, start_date, end_date, status, budget_allocated, beneficiaries_target, beneficiaries_served, notes)
+                  VALUES ('$activity_name', '$activity_type', '$description', $ministry_id, $program_id, $coordinator_id, $start_date, $end_date, '$status', $budget_allocated, $beneficiaries_target, $beneficiaries_served, '$notes')";
+        $table_name = 'community_activities';
+        $log_desc = "Added activity: $activity_name";
     }
 
     if (isset($query) && $conn->query($query) === TRUE) {

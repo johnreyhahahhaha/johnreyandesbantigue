@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
     Box,
     Container,
@@ -27,12 +28,16 @@ import {
     CardContent,
     Grid,
 } from '@mui/material';
-import { Add as AddIcon, Delete as DeleteIcon, Download as DownloadIcon } from '@mui/icons-material';
+import { Add as AddIcon, Delete as DeleteIcon, Download as DownloadIcon, ArrowBack as ArrowBackIcon } from '@mui/icons-material';
 import axios from 'axios';
+import { usePermission } from '../contexts/PermissionContext';
 
-const API_BASE_URL = 'http://localhost/josephus/st.joseph/public/api';
+const API_BASE_URL = 'http://165.22.181.147/api';
 
 const FileAttachments = () => {
+    const navigate = useNavigate();
+    const location = useLocation();
+    const { canCreate, canDelete } = usePermission();
     const [files, setFiles] = useState([]);
     const [persons, setPersons] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -49,6 +54,14 @@ const FileAttachments = () => {
         baptism_id: '',
         asset_id: '',
     });
+
+    const queryParams = new URLSearchParams(location.search || '');
+    const focusedPersonId = queryParams.get('person_id');
+    const focusedFileId = queryParams.get('file_id');
+    const filteredFiles = focusedPersonId
+        ? files.filter((file) => String(file.person_id ?? '') === String(focusedPersonId))
+        : files;
+    const highlightedFileId = focusedFileId ? Number(focusedFileId) : null;
 
     useEffect(() => {
         fetchFiles();
@@ -165,36 +178,48 @@ const FileAttachments = () => {
     }
 
     return (
-        <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Box sx={{ minHeight: '100vh', bgcolor: '#edf3f1' }}>
+        <Box sx={{ py: { xs: 2.5, md: 3 }, background: 'linear-gradient(110deg, #123b50 0%, #0b6b68 70%, #d1a557 155%)', boxShadow: '0 12px 26px rgba(13, 70, 76, 0.14)' }}>
+            <Container maxWidth="lg">
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' }, flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                    <IconButton onClick={() => navigate('/dashboard')} aria-label="Back to dashboard" sx={{ backgroundColor: 'rgba(255,255,255,0.14)', color: 'white', '&:hover': { backgroundColor: 'rgba(255,255,255,0.24)' } }}>
+                        <ArrowBackIcon />
+                    </IconButton>
+                    <Box>
+                        <Typography variant="overline" sx={{ color: 'rgba(255,255,255,0.7)', fontWeight: 700, letterSpacing: '0.12em' }}>
+                            Parish archive
+                        </Typography>
+                        <Typography variant="h4" sx={{ fontWeight: 800, color: 'white', lineHeight: 1.15 }}>File attachments</Typography>
+                        <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.78)', mt: 0.5 }}>Keep supporting files connected to parish records.</Typography>
+                    </Box>
+                </Box>
+                {canCreate('file_attachments') && (
+                    <Button variant="contained" startIcon={<AddIcon />} onClick={handleOpenDialog} sx={{ bgcolor: '#d6a85a', color: '#123b50', '&:hover': { bgcolor: '#e3ba70' }, boxShadow: 'none' }}>
+                        Upload File
+                    </Button>
+                )}
+            </Box>
+            </Container>
+        </Box>
+        <Container maxWidth="lg" sx={{ py: { xs: 3, md: 4 } }}>
             {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
             {success && <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>}
 
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-                <Typography variant="h4">File Attachments</Typography>
-                <Button
-                    variant="contained"
-                    color="primary"
-                    startIcon={<AddIcon />}
-                    onClick={handleOpenDialog}
-                >
-                    Upload File
-                </Button>
-            </Box>
-
-            <Card sx={{ mb: 3 }}>
-                <CardContent>
+            <Card sx={{ mb: 3, borderRadius: 3, border: '1px solid rgba(17, 75, 80, 0.1)', boxShadow: '0 8px 24px rgba(26, 67, 74, 0.06)' }}>
+                <CardContent sx={{ p: { xs: 1.5, md: 2 } }}>
                     <Grid container spacing={2}>
                         <Grid item xs={12} sm={6} md={4}>
-                            <Box sx={{ p: 2, bgcolor: '#e3f2fd', borderRadius: 1 }}>
-                                <Typography color="textSecondary" gutterBottom>
+                            <Box sx={{ p: 2, bgcolor: '#e5f3f6', borderTop: '3px solid #168fa3', borderRadius: 2 }}>
+                                <Typography color="textSecondary" variant="caption" sx={{ fontWeight: 700 }}>
                                     Total Files
                                 </Typography>
                                 <Typography variant="h5">{files.length}</Typography>
                             </Box>
                         </Grid>
                         <Grid item xs={12} sm={6} md={4}>
-                            <Box sx={{ p: 2, bgcolor: '#f3e5f5', borderRadius: 1 }}>
-                                <Typography color="textSecondary" gutterBottom>
+                            <Box sx={{ p: 2, bgcolor: '#f1e9f6', borderTop: '3px solid #7d6acb', borderRadius: 2 }}>
+                                <Typography color="textSecondary" variant="caption" sx={{ fontWeight: 700 }}>
                                     Person Records
                                 </Typography>
                                 <Typography variant="h5">
@@ -203,8 +228,8 @@ const FileAttachments = () => {
                             </Box>
                         </Grid>
                         <Grid item xs={12} sm={6} md={4}>
-                            <Box sx={{ p: 2, bgcolor: '#e8f5e9', borderRadius: 1 }}>
-                                <Typography color="textSecondary" gutterBottom>
+                            <Box sx={{ p: 2, bgcolor: '#e8f4ec', borderTop: '3px solid #25a878', borderRadius: 2 }}>
+                                <Typography color="textSecondary" variant="caption" sx={{ fontWeight: 700 }}>
                                     Other Records
                                 </Typography>
                                 <Typography variant="h5">
@@ -216,9 +241,9 @@ const FileAttachments = () => {
                 </CardContent>
             </Card>
 
-            <TableContainer component={Paper}>
+            <TableContainer component={Paper} sx={{ borderRadius: 3, border: '1px solid rgba(17, 75, 80, 0.1)', boxShadow: '0 8px 24px rgba(26, 67, 74, 0.06)', overflow: 'auto' }}>
                 <Table>
-                    <TableHead sx={{ bgcolor: '#f5f5f5' }}>
+                    <TableHead>
                         <TableRow>
                             <TableCell><strong>File ID</strong></TableCell>
                             <TableCell><strong>File Name</strong></TableCell>
@@ -230,14 +255,22 @@ const FileAttachments = () => {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {files.length > 0 ? (
-                            files.map((file) => (
-                                <TableRow key={file.file_id} hover>
+                        {filteredFiles.length > 0 ? (
+                            filteredFiles.map((file) => (
+                                <TableRow
+                                    key={file.file_id}
+                                    hover
+                                    sx={{
+                                        backgroundColor: highlightedFileId === Number(file.file_id) ? '#fff7d6' : 'transparent',
+                                        boxShadow: highlightedFileId === Number(file.file_id) ? 'inset 0 0 0 2px #facc15' : 'none',
+                                        transition: 'all 0.2s ease',
+                                    }}
+                                >
                                     <TableCell>{file.file_id}</TableCell>
-                                    <TableCell>{file.file_name}</TableCell>
+                                    <TableCell sx={{ fontWeight: 700, color: '#123b50' }}>{file.file_name}</TableCell>
                                     <TableCell>
                                         <a 
-                                            href={`http://localhost/josephus/st.joseph/public/${file.file_path}`}
+                                            href={`http://165.22.181.147/${file.file_path}`}
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             style={{
@@ -259,26 +292,28 @@ const FileAttachments = () => {
                                         <IconButton
                                             color="primary"
                                             size="small"
-                                            href={`http://localhost/josephus/st.joseph/public/${file.file_path}`}
+                                            href={`http://165.22.181.147/${file.file_path}`}
                                             target="_blank"
                                             title="Download file"
                                         >
                                             <DownloadIcon />
                                         </IconButton>
-                                        <IconButton
-                                            color="error"
-                                            size="small"
-                                            onClick={() => handleDeleteFile(file.file_id)}
-                                        >
-                                            <DeleteIcon />
-                                        </IconButton>
+                                        {canDelete('file_attachments') && (
+                                            <IconButton
+                                                color="error"
+                                                size="small"
+                                                onClick={() => handleDeleteFile(file.file_id)}
+                                            >
+                                                <DeleteIcon />
+                                            </IconButton>
+                                        )}
                                     </TableCell>
                                 </TableRow>
                             ))
                         ) : (
                             <TableRow>
                                 <TableCell colSpan={6} align="center" sx={{ py: 3 }}>
-                                    No file attachments found
+                                    {focusedPersonId ? 'No file attachments found for this person' : 'No file attachments found'}
                                 </TableCell>
                             </TableRow>
                         )}
@@ -387,7 +422,7 @@ const FileAttachments = () => {
                         />
                         {selectedFile && (
                             <Typography variant="caption" sx={{ color: '#10b981', mt: 1, display: 'block' }}>
-                                ✓ {selectedFile.name} selected ({(selectedFile.size / 1024).toFixed(2)} KB)
+                                âœ“ {selectedFile.name} selected ({(selectedFile.size / 1024).toFixed(2)} KB)
                             </Typography>
                         )}
                     </Box>
@@ -400,6 +435,7 @@ const FileAttachments = () => {
                 </DialogActions>
             </Dialog>
         </Container>
+        </Box>
     );
 };
 

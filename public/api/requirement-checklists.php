@@ -65,18 +65,21 @@ if ($request_method === 'GET') {
     $category = $conn->real_escape_string($data['category'] ?? 'Baptism');
     $requirement_name = $conn->real_escape_string($data['requirement_name']);
     $is_submitted = intval($data['is_submitted'] ?? 0);
-    $date_submitted = $data['is_submitted'] ? $conn->real_escape_string($data['date_submitted'] ?? date('Y-m-d')) : 'NULL';
+    // if submission checkbox is set but date is empty string, fall back to today
+    $date_submitted = $is_submitted ? $conn->real_escape_string(($data['date_submitted'] ?? '') ?: date('Y-m-d')) : 'NULL';
     $baptism_id = intval($data['baptism_id'] ?? 0);
     $marriage_id = intval($data['marriage_id'] ?? 0);
     $confirmation_id = intval($data['confirmation_id'] ?? 0);
+    $record_id = intval($data['record_id'] ?? 0);
 
     $date_submitted_val = ($date_submitted === 'NULL') ? 'NULL' : "'$date_submitted'";
     $baptism_id_val = $baptism_id > 0 ? $baptism_id : 'NULL';
     $marriage_id_val = $marriage_id > 0 ? $marriage_id : 'NULL';
     $confirmation_id_val = $confirmation_id > 0 ? $confirmation_id : 'NULL';
+    $record_id_val = $record_id > 0 ? $record_id : 'NULL';
 
-    $query = "INSERT INTO requirement_checklists (category, requirement_name, is_submitted, date_submitted, baptism_id, marriage_id, confirmation_id)
-              VALUES ('$category', '$requirement_name', $is_submitted, $date_submitted_val, $baptism_id_val, $marriage_id_val, $confirmation_id_val)";
+    $query = "INSERT INTO requirement_checklists (category, requirement_name, is_submitted, date_submitted, baptism_id, marriage_id, confirmation_id, record_id)
+              VALUES ('$category', '$requirement_name', $is_submitted, $date_submitted_val, $baptism_id_val, $marriage_id_val, $confirmation_id_val, $record_id_val)";
 
     if ($conn->query($query) === TRUE) {
         $check_id = $conn->insert_id;
@@ -103,11 +106,22 @@ if ($request_method === 'GET') {
         exit();
     }
 
+    $category = $conn->real_escape_string($data['category'] ?? 'Baptism');
+    $requirement_name = $conn->real_escape_string($data['requirement_name'] ?? '');
     $is_submitted = intval($data['is_submitted'] ?? 0);
-    $date_submitted = $is_submitted ? $conn->real_escape_string($data['date_submitted'] ?? date('Y-m-d')) : 'NULL';
-    $date_submitted_val = ($date_submitted === 'NULL') ? 'NULL' : "'$date_submitted'";
+    $date_submitted = $is_submitted ? $conn->real_escape_string(($data['date_submitted'] ?? '') ?: date('Y-m-d')) : 'NULL';
+    $baptism_id = intval($data['baptism_id'] ?? 0);
+    $marriage_id = intval($data['marriage_id'] ?? 0);
+    $confirmation_id = intval($data['confirmation_id'] ?? 0);
+    $record_id = intval($data['record_id'] ?? 0);
 
-    $query = "UPDATE requirement_checklists SET is_submitted = $is_submitted, date_submitted = $date_submitted_val WHERE check_id = $check_id";
+    $date_submitted_val = ($date_submitted === 'NULL') ? 'NULL' : "'$date_submitted'";
+    $baptism_id_val = $baptism_id > 0 ? $baptism_id : 'NULL';
+    $marriage_id_val = $marriage_id > 0 ? $marriage_id : 'NULL';
+    $confirmation_id_val = $confirmation_id > 0 ? $confirmation_id : 'NULL';
+    $record_id_val = $record_id > 0 ? $record_id : 'NULL';
+
+    $query = "UPDATE requirement_checklists SET category = '$category', requirement_name = '$requirement_name', is_submitted = $is_submitted, date_submitted = $date_submitted_val, baptism_id = $baptism_id_val, marriage_id = $marriage_id_val, confirmation_id = $confirmation_id_val, record_id = $record_id_val WHERE check_id = $check_id";
 
     if ($conn->query($query) === TRUE) {
         logAuditAction($_SESSION['user_id'] ?? 0, 'UPDATE', 'requirement_checklists', "Updated requirement checklist: $check_id", $conn);

@@ -1,0 +1,15 @@
+{
+    "name": "stjoseph/parish-system",
+    "description": "Parish management system",
+    "type": "project",
+    "authors": [
+        {
+            "name": "St Joseph Parish"
+        }
+    ],
+    "require": {
+        "phpmailer/phpmailer": "^7.0",
+        "league/oauth2-google": "^4.2",
+        "google/apiclient": "^2.19"
+    }
+}

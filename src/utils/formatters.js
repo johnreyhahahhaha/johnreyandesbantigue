@@ -1,8 +1,35 @@
+export const parseSafeDate = (value) => {
+    if (value === null || value === undefined || value === '') return null;
+
+    const raw = typeof value === 'string' ? value.trim() : value;
+    if (!raw) return null;
+
+    if (typeof raw === 'string' && /^0000[-/]|^0{4}-00-00|^0{4}-0{2}-0{2}$/i.test(raw)) {
+        return null;
+    }
+
+    const date = new Date(raw);
+    if (Number.isNaN(date.getTime())) return null;
+
+    const year = date.getFullYear();
+    if (!Number.isFinite(year) || year < 100 || year > 9999) return null;
+
+    return date;
+};
+
+export const formatSafeIsoDate = (value) => {
+    const date = parseSafeDate(value);
+    if (!date) return null;
+    return date.toISOString().slice(0, 10);
+};
+
 // Date formatting utility
 export const formatDate = (date) => {
     if (!date) return '';
+    const safeDate = parseSafeDate(date);
+    if (!safeDate) return '';
     const options = { year: 'numeric', month: 'long', day: 'numeric' };
-    return new Date(date).toLocaleDateString('en-US', options);
+    return safeDate.toLocaleDateString('en-US', options);
 };
 
 // Time formatting utility
